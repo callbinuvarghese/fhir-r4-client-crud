@@ -81,7 +81,7 @@ public class S3Search {
             System.out.printf("Found patient with MRN: %s \n", patient.getId());
         }
         System.out.println("Stated searching for Observation.. it may take coupld of mins");
-        int patientCount  = s2Search.getNumberOfPatientsByObservationForLOINCCOde(ConstantsClz.LOIC_CODE_BODY_TEMPARATURE);
+        int patientCount  = s2Search.getNumberOfPatientsByObservationForLOINCCOde(ConstantsClz.LOIC_CODE_BODY_TEMPERATURE);
         System.out.println("PatientCount:" + patientCount);
 
     }

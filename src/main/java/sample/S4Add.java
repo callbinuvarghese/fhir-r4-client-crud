@@ -4,6 +4,7 @@ package sample;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.context.FhirContext;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 
 import java.util.*;
@@ -18,13 +19,26 @@ public class S4Add {
     public static final String PATIENT_1_GIVEN = "Binu";
     public static final String PATIENT_1_FAMILY = "Doe";
     public static final String PATIENT_1_DOB = "1975-12-24";
-    public static final String PATIENT_1_OBS_2_LOINC_CODE = ConstantsClz.LOIC_CODE_BODY_TEMPARATURE;
+    public static final String PATIENT_1_OBS_1_LOINC_CODE = ConstantsClz.LOIC_CODE_BLOOD_REDCELLS;
+    public static final String PATIENT_1_OBS_1_LOINC_WHEN = "2011-09-03T11:13:00-04:00";
+    public static final String PATIENT_1_OBS_2_LOINC_CODE = ConstantsClz.LOIC_CODE_BODY_TEMPERATURE;
     public static final String PATIENT_1_OBS_2_LOINC_WHEN = "2011-09-22";
 
 
     public S4Add(String baseUrl) {
         FhirContext ctx = FhirContext.forR4();
         client = ctx.newRestfulGenericClient(baseUrl);
+    }
+
+    public String createResource(IBaseResource resource) {
+        MethodOutcome outcome = client.create().resource(resource).execute();
+        if (outcome.getId() != null) {
+            System.out.println("Resource created with Id:" + outcome.getId());
+            return outcome.getId().getValue();
+        } else {
+            System.out.println("Adding patient failed to return id");
+        }
+        return  null;
     }
 
     /**
@@ -126,6 +140,38 @@ public class S4Add {
         return observationId;
     }
 
+
+    public String addObservationMultiCompForPatient(String patientId, DateTimeType when, String loincCode, String loincDisplayName,
+                                                    List<Observation.ObservationComponentComponent> obsComponents ) {
+        String observationId = null;
+        Observation observation = new Observation();
+        observation.setStatus(Observation.ObservationStatus.FINAL);
+        observation.addIdentifier()
+                .setSystem(ConstantsClz.IDENTTIFIER_SYSTEM_OBS)
+                .setValue(getObservationId(loincCode, when));
+        observation
+                .getCode()
+                .addCoding()
+                .setSystem(ConstantsClz.SYSTEM_LOINC)
+                .setCode(loincCode)
+                .setDisplay(loincDisplayName);
+        observation.setEffective(when);
+        observation.setSubject(new Reference(patientId));
+
+        for (Observation.ObservationComponentComponent obsComponent: obsComponents) {
+            observation.addComponent(obsComponent);
+        }
+        Observation.ObservationComponentComponent obsComponent= observation.addComponent();
+
+        MethodOutcome outcome = client.create().resource(observation).execute();
+        if (outcome.getId() != null) {
+            System.out.println("Observation created with Id:" + outcome.getId());
+            observationId = outcome.getId().getValue();
+        } else {
+            System.out.println("Adding patient failed to return id");
+        }
+        return observationId;
+    }
     /*
     Create Annotation
      */
@@ -145,13 +191,13 @@ public class S4Add {
     public static void main(String[] args) {
         S4Add s3Add = new S4Add(ConstantsClz.FHIR_BASE_URL);
         String patientId = s3Add.addPatient(PATIENT_1_MRN,PATIENT_1_GIVEN, PATIENT_1_FAMILY, new DateType(PATIENT_1_DOB));
-        String obeservationId = s3Add.addObservationForPatient(patientId, new DateTimeType("2011-09-03T11:13:00-04:00"),ConstantsClz.LOIC_CODE_BLOOD_REDCELLS, ConstantsClz.LOIC_DESC_BLOOD_REDCELLS, 4.12, "10 trillion/L", "10*12/L");
+        String obeservationId = s3Add.addObservationForPatient(patientId, new DateTimeType(PATIENT_1_OBS_1_LOINC_WHEN),ConstantsClz.LOIC_CODE_BLOOD_REDCELLS, ConstantsClz.LOIC_DESC_BLOOD_REDCELLS, 4.12, ConstantsClz.LOIC_UOM_UNIT_BODY_REDCELLS, ConstantsClz.LOIC_UOM_CODE_BODY_REDCELLS);
         if (obeservationId != null) {
             System.out.println("ObservationId:" + obeservationId);
         } else {
             System.out.println("Observation not created successfully");
         }
-        obeservationId = s3Add.addObservationForPatient(patientId, new DateTimeType(PATIENT_1_OBS_2_LOINC_WHEN),ConstantsClz.LOIC_CODE_BODY_TEMPARATURE, ConstantsClz.LOIC_DESC_BODY_TEMPARATURE, 36.5, "C", "Cel");
+        obeservationId = s3Add.addObservationForPatient(patientId, new DateTimeType(PATIENT_1_OBS_2_LOINC_WHEN),ConstantsClz.LOIC_CODE_BODY_TEMPERATURE, ConstantsClz.LOIC_DESC_BODY_TEMPERATURE, 36.5, ConstantsClz.LOIC_UOM_UNIT_BODY_TEMPERATURE, ConstantsClz.LOIC_UOM_CODE_BODY_TEMPERATURE);
         if (obeservationId != null) {
             System.out.println("ObservationId Body Temperature:" + obeservationId);
         } else {
