@@ -58,7 +58,7 @@ public class S6Delete {
     public static void main(String[] args) {
         S6Delete s5Delete = new S6Delete(ConstantsClz.FHIR_BASE_URL);
         Patient patient = s5Delete.findPatientByNameDOB("Binu", "Doe", new DateType("1975-12-24"), "125678");
-        Observation observation = s5Delete.findObservationByPatientLOINCOnEffectiveDt(patient, new DateTimeType("2011-09-22"),ConstantsClz.LOIC_CODE_BODY_TEMPERATURE);
+        Observation observation = s5Delete.findObservationByPatientLOINCOnEffectiveDt(patient, new DateTimeType("2011-09-22"),ConstantsClz.LOIC_CODE_BODY_TEMPARATURE);
         String observationId = observation.getId();
         observation = s5Delete.readObservationById(observationId);
         if (observation ==null) {
