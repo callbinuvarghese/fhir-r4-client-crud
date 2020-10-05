@@ -4,6 +4,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.validation.FhirValidator;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r4.model.*;
 
@@ -105,6 +106,8 @@ public class S2SearchCommonUtil {
         }
         return patientFound;
     }
+
+
     /*
        Search observation for the given patient with given LOINC code and effective date
         */
@@ -137,6 +140,32 @@ public class S2SearchCommonUtil {
             }
         }
         return observationFound;
+    }
+    public Observation.ObservationComponentComponent createObservationComponent(String loincCode, String loincDisplayName,
+                                                                                double value, String valueUnit, String valueUOMCode) {
+        Observation.ObservationComponentComponent obsCompComponent = new Observation.ObservationComponentComponent();
+        obsCompComponent
+                .getCode()
+                .addCoding()
+                .setSystem(ConstantsClz.SYSTEM_LOINC)
+                .setCode(loincCode)
+                .setDisplay(loincDisplayName);
+        obsCompComponent.setValue(
+                new Quantity()
+                        .setValue(value)
+                        .setUnit(valueUnit)
+                        .setSystem(ConstantsClz.SYSTEM_UOM)
+                        .setCode(valueUOMCode));
+        return  obsCompComponent;
+    }
+
+
+
+    public List<Observation.ObservationComponentComponent> createObservationComponentsBP(double sys, double dia) {
+        List<Observation.ObservationComponentComponent> list = new ArrayList<Observation.ObservationComponentComponent>();
+        list.add(createObservationComponent(ConstantsClz.LOIC_CODE_BLOOD_PRESSURE_PANEL_SYS,"", 106, ConstantsClz.LOIC_UOM_UNIT_BLOOD_PRESSURE_PANEL, ConstantsClz.LOIC_UOM_CODE_BLOOD_PRESSURE_PANEL));
+        list.add(createObservationComponent(ConstantsClz.LOIC_CODE_BLOOD_PRESSURE_PANEL_DIA,"", 76, ConstantsClz.LOIC_UOM_UNIT_BLOOD_PRESSURE_PANEL, ConstantsClz.LOIC_UOM_CODE_BLOOD_PRESSURE_PANEL));
+        return  list;
     }
 
 }

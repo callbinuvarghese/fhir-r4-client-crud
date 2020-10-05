@@ -8,10 +8,10 @@ import ca.uhn.fhir.validation.ValidationResult;
 
 import java.util.List;
 
-public class S7Validate {
+public class S9Validate {
     private IGenericClient client = null;
 
-    public S7Validate(String baseUrl) {
+    public S9Validate(String baseUrl) {
         FhirContext ctx = FhirContext.forR4();
         client = ctx.newRestfulGenericClient(baseUrl);
     }
